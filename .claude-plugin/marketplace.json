@@ -145,6 +145,17 @@
       },
       "source": "./plugins/security-guidance",
       "category": "security"
+    },
+    {
+      "name": "nika",
+      "description": "Nika — Native multi-agent OS for the terminal. Kubernetes-like agent spawning with prompt partitioning, result merging, persistent memory, cron jobs, and self-creating hooks/skills via a super-instance.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Nika",
+        "email": "nika@anthropic.com"
+      },
+      "source": "./plugins/nika",
+      "category": "development"
     }
   ]
 }
