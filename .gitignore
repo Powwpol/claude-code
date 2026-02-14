@@ -1,2 +1,5 @@
 .DS_Store
 
+# Nika OS runtime state (generated at runtime, not committed)
+.claude/state/
+
