@@ -1,0 +1,10 @@
+{
+  "name": "nika",
+  "version": "1.0.0",
+  "description": "Nika — Native multi-agent OS for the terminal. Kubernetes-like agent spawning with prompt partitioning, result merging, persistent memory, cron jobs, and self-creating hooks/skills via a super-instance.",
+  "author": {
+    "name": "Nika",
+    "email": "nika@anthropic.com"
+  },
+  "keywords": ["multi-agent", "orchestrator", "persistent-memory", "cron", "kubernetes", "os"]
+}
