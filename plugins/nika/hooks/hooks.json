@@ -1,5 +1,5 @@
 {
-  "description": "Nika OS hooks — session lifecycle, memory persistence, cron scheduling",
+  "description": "Nika OS hooks — full lifecycle: context monitoring, state persistence, cron scheduling, file tracking, notifications",
   "hooks": {
     "SessionStart": [
       {
@@ -8,6 +8,60 @@
             "type": "command",
             "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks-handlers/session-start.py",
             "timeout": 15
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check_context.py --init",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check_context.py",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json,sys; d=json.load(sys.stdin); cmd=d.get('tool_input',{}).get('command',''); blocked=['rm -rf /','rm -rf ~','DROP DATABASE']; sys.exit(2) if any(b in cmd for b in blocked) else sys.exit(0)\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json,sys,datetime; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); log={'timestamp':datetime.datetime.utcnow().isoformat()+'Z','event':'file_modified','file':fp}; open('.claude/state/execution-log.jsonl','a').write(json.dumps(log)+'\\n')\" 2>/dev/null || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks-handlers/cron-check.py",
+            "timeout": 10
           }
         ]
       }
@@ -21,15 +75,44 @@
             "timeout": 10
           }
         ]
-      }
-    ],
-    "UserPromptSubmit": [
+      },
       {
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks-handlers/cron-check.py",
-            "timeout": 10
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/save_state.py 2>/dev/null || true",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/notify.sh 'Nika OS' 'Session terminée' 2>/dev/null || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/notify.sh 'Nika Sub-Agent' 'Tâche sub-agent terminée' 2>/dev/null || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/save_state.py --pre-compact 2>/dev/null || true",
+            "timeout": 15
           }
         ]
       }

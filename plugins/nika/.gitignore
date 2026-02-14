@@ -1,3 +1,9 @@
 __pycache__/
 *.pyc
 *.pyo
+
+# Runtime state files (generated at runtime, not committed)
+state/*.jsonl
+state/*.json
+state/*.md
+!state/.gitkeep
